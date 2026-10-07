@@ -20,14 +20,17 @@ if (!MONGO_URI || !JWT_SECRET) {
 
 const app = express();
 
+// Middleware
 app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json({ limit: "100kb" }));
 
+// Routes
 app.use("/activity", activityRoutes);
 app.use("/balance", balanceRoutes);
 app.use("/user", userRoutes);
 app.use("/api/holdings", holdingsRoutes);
 
+// Health check
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running!" });
 });
@@ -38,6 +41,7 @@ app.use((req, res) => {
 
 app.use(errorMiddleware);
 
+// Start server
 connectDatabase(MONGO_URI)
   .then(() => {
     app.listen(PORT, () => {

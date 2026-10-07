@@ -24,15 +24,21 @@ export default function LoginPage() {
   }, [hydrated, token, vaultOpening, router])
 
   const handleLoginSuccess = () => {
+    // Trigger vault door animation
     setVaultOpening(true)
+
+    // Navigate after animation
     setTimeout(() => router.push('/dashboard'), VAULT_ANIMATION_MS)
   }
 
   return (
     <div className="min-h-screen bg-radial-obsidian flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-[#D4AF37]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-[#C0C0C0]/5 rounded-full blur-3xl" />
+
+        {/* Vault door pattern */}
         <div
           className="absolute inset-0 opacity-5"
           style={{
@@ -42,9 +48,12 @@ export default function LoginPage() {
         />
       </div>
 
+      {/* Vault Door Animation Overlay */}
       {vaultOpening && <VaultDoor />}
 
+      {/* Login Card */}
       <div className="w-full max-w-md relative z-10">
+        {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex flex-col items-center gap-3">
             <div className="relative">
@@ -62,6 +71,7 @@ export default function LoginPage() {
           <p className="text-sm text-[#888888] mt-2">Access your precious metal portfolio</p>
         </div>
 
+        {/* Glass Card */}
         <div className="glass rounded-2xl p-8 gold-glow">
           <Tabs defaultValue="email" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6 bg-[#1A1A1A] p-1 rounded-lg">
@@ -81,10 +91,12 @@ export default function LoginPage() {
               </TabsTrigger>
             </TabsList>
 
+            {/* Email Tab */}
             <TabsContent value="email">
               <EmailLoginForm onSuccess={handleLoginSuccess} />
             </TabsContent>
 
+            {/* Wallet Tab */}
             <TabsContent value="wallet" className="space-y-6">
               <div className="text-center py-4">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center">
@@ -105,6 +117,7 @@ export default function LoginPage() {
             </TabsContent>
           </Tabs>
 
+          {/* Security Badge */}
           <div className="mt-6 pt-6 border-t border-[#2A2A2A]">
             <div className="flex items-center justify-center gap-2 text-xs text-[#888888]">
               <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
@@ -115,6 +128,7 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {/* Sign up link */}
         <p className="text-center text-sm text-[#888888] mt-6">
           {"Don't have an account?"}{' '}
           <a href="#" className="text-[#D4AF37] hover:text-[#E6C861] font-medium">

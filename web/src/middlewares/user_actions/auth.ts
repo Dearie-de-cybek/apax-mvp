@@ -4,6 +4,10 @@ import User, { IUser } from "../../models/userModel";
 import ErrorHandler from "../../utils/errorHandler";
 import asyncErrorHandler from "../helpers/asyncErrorHandler";
 
+/**
+ * Extend Express Request to include user
+ * (Ideally place this in a global typings file)
+ */
 export interface AuthenticatedRequest extends Request {
   user?: IUser;
 }
