@@ -6,6 +6,7 @@ import connectDatabase from "./config/database";
 import errorMiddleware from "./middlewares/error";
 import activityRoutes from "./routes/activity";
 import balanceRoutes from "./routes/balance";
+import holdingsRoutes from "./routes/holdings";
 import userRoutes from "./routes/users";
 
 const { MONGO_URI, JWT_SECRET } = process.env;
@@ -25,6 +26,7 @@ app.use(express.json({ limit: "100kb" }));
 app.use("/activity", activityRoutes);
 app.use("/balance", balanceRoutes);
 app.use("/user", userRoutes);
+app.use("/api/holdings", holdingsRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running!" });
