@@ -4,8 +4,12 @@ import Image from 'next/image'
 import { PortfolioOverview } from '@/components/portfolio-overview'
 import { AssetAllocationChart } from '@/components/asset-allocation-chart'
 import { ShariaCertificationHub } from '@/components/sharia-certification-hub'
+import { HoldingsSection } from '@/components/holdings/holdings-section'
+import { useAuthStore } from '@/lib/auth-store'
 
 export function DashboardView() {
+  const firstName = useAuthStore((s) => s.user?.name.trim().split(/\s+/)[0])
+
   return (
     <div className="space-y-4 md:space-y-6 stagger-in max-w-7xl mx-auto overflow-hidden">
       {/* Live Ledger Ticker */}
@@ -26,10 +30,10 @@ export function DashboardView() {
       </div>
 
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl md:text-2xl font-serif font-bold text-[#E8E8E8]">
-            Welcome back, John!
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-2xl font-serif font-bold text-[#E8E8E8] truncate">
+            {firstName ? `Welcome back, ${firstName}!` : 'Welcome back!'}
           </h1>
         </div>
         <div className="flex items-center gap-3">
@@ -44,16 +48,18 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Portfolio Overview Stats */}
-      <PortfolioOverview />
+      <HoldingsSection>
+        {/* Portfolio Overview Stats */}
+        <PortfolioOverview />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 items-start">
-        {/* Asset Allocation Charts */}
-        <AssetAllocationChart />
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6 items-start">
+          {/* Asset Allocation Charts */}
+          <AssetAllocationChart />
 
-        {/* Sharia Certification Hub - Moved inside grid for better density */}
-        <ShariaCertificationHub />
-      </div>
+          {/* Sharia Certification Hub - Moved inside grid for better density */}
+          <ShariaCertificationHub />
+        </div>
+      </HoldingsSection>
     </div>
   )
 }

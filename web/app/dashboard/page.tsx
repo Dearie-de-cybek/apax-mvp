@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { DashboardView } from '@/components/views/dashboard-view'
 import { PorView } from '@/components/views/por-view'
@@ -8,9 +9,23 @@ import { ZakatView } from '@/components/views/zakat-view'
 import { RedemptionView } from '@/components/views/redemption-view'
 import { ShariaView } from '@/components/views/sharia-view'
 import { useAPAXStore } from '@/lib/store'
+import { useAuthStore } from '@/lib/auth-store'
 
 export default function DashboardPage() {
-  const { activeView, addAuditLog } = useAPAXStore()
+  const router = useRouter()
+  const { activeView, addAuditLog, fetchHoldings } = useAPAXStore()
+  const hydrated = useAuthStore((s) => s.hydrated)
+  const token = useAuthStore((s) => s.token)
+
+  // Send signed-out visitors (or expired sessions) back to login
+  useEffect(() => {
+    if (hydrated && !token) router.replace('/login')
+  }, [hydrated, token, router])
+
+  // Load live holdings once we have a session
+  useEffect(() => {
+    if (token) fetchHoldings()
+  }, [token, fetchHoldings])
 
   // Simulate live price updates
   useEffect(() => {
@@ -67,6 +82,10 @@ export default function DashboardPage() {
       default:
         return <DashboardView />
     }
+  }
+
+  if (!hydrated || !token) {
+    return <div className="min-h-screen bg-[#0A0A0A]" aria-busy="true" />
   }
 
   return (

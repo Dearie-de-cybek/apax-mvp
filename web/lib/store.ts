@@ -1,6 +1,9 @@
 'use client'
 
 import { create } from 'zustand'
+import { useAuthStore } from '@/lib/auth-store'
+import { NETWORK_ERROR } from '@/lib/services/base.api'
+import { getHoldingsApi } from '@/lib/services/holdings.api'
 
 // Types
 export interface MetalPrice {
@@ -49,6 +52,11 @@ interface APAXStore {
   // User Holdings
   userHoldings: UserHolding
   setUserHoldings: (holdings: UserHolding) => void
+  holdingsStatus: 'idle' | 'loading' | 'success' | 'error'
+  holdingsError: string | null
+  holdingsUpdatedAt: string | null
+  fetchHoldings: () => Promise<void>
+  clearHoldings: () => void
   
   // Vault Data
   vaultData: VaultData
@@ -75,10 +83,11 @@ const initialMetalPrices: MetalPrice = {
   lastUpdated: new Date()
 }
 
+// Metal grams come from GET /api/holdings, apxiTokens is still mock until the index token has an API
 const initialUserHoldings: UserHolding = {
-  goldGrams: 156.75,
-  silverGrams: 892.40,
-  platinumGrams: 45.20,
+  goldGrams: 0,
+  silverGrams: 0,
+  platinumGrams: 0,
   apxiTokens: 1250.00
 }
 
@@ -137,6 +146,40 @@ export const useAPAXStore = create<APAXStore>((set, get) => ({
   // User Holdings
   userHoldings: initialUserHoldings,
   setUserHoldings: (holdings) => set({ userHoldings: holdings }),
+  holdingsStatus: 'idle',
+  holdingsError: null,
+  holdingsUpdatedAt: null,
+  fetchHoldings: async () => {
+    const token = useAuthStore.getState().token
+    if (!token || get().holdingsStatus === 'loading') return
+
+    set({ holdingsStatus: 'loading', holdingsError: null })
+    const res = await getHoldingsApi(token)
+
+    if (!res.ok) {
+      if (res.status === 401) useAuthStore.getState().clearSession()
+      set({
+        holdingsStatus: 'error',
+        holdingsError: res.status === NETWORK_ERROR
+          ? "We couldn't reach APAX. Check your connection and try again."
+          : res.message
+      })
+      return
+    }
+
+    const { gold, silver, platinum } = res.data.holdings
+    set((state) => ({
+      holdingsStatus: 'success',
+      holdingsUpdatedAt: res.data.updatedAt,
+      userHoldings: { ...state.userHoldings, goldGrams: gold, silverGrams: silver, platinumGrams: platinum }
+    }))
+  },
+  clearHoldings: () => set({
+    userHoldings: initialUserHoldings,
+    holdingsStatus: 'idle',
+    holdingsError: null,
+    holdingsUpdatedAt: null
+  }),
   
   // Vault Data
   vaultData: initialVaultData,
