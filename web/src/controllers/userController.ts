@@ -42,8 +42,8 @@ export const registerUser = asyncErrorHandler(
 // ================= LOGIN =================
 export const loginUser = asyncErrorHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email, password } = req.body ?? {};
+    if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
       return next(new ErrorHandler("Please Enter Email And Password", 400));
     }
 
