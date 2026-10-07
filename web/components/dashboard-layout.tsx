@@ -8,6 +8,8 @@ import { Bell, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAPAXStore } from '@/lib/store'
+import { useAuthStore } from '@/lib/auth-store'
+import { getInitials } from '@/lib/utils'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -15,6 +17,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { metalPrices } = useAPAXStore()
+  const userName = useAuthStore((s) => s.user?.name)
 
   return (
     <SidebarProvider>
@@ -68,8 +71,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </Button>
 
             {/* User Avatar */}
-            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B8860B] flex items-center justify-center text-[#0A0A0A] font-semibold text-sm">
-              AA
+            <div
+              className="h-9 w-9 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B8860B] flex items-center justify-center text-[#0A0A0A] font-semibold text-sm"
+              title={userName}
+            >
+              {getInitials(userName) || '?'}
             </div>
           </div>
         </header>

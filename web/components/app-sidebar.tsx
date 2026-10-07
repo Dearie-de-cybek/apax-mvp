@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/sidebar'
 import { useAPAXStore } from '@/lib/store'
 import { useAuthStore } from '@/lib/auth-store'
+import { getInitials } from '@/lib/utils'
 
 const mainNavItems = [
   {
@@ -72,12 +73,7 @@ export function AppSidebar() {
   const user = useAuthStore((s) => s.user)
   const clearSession = useAuthStore((s) => s.clearSession)
 
-  const initials = (user?.name ?? '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('')
+  const initials = getInitials(user?.name)
 
   const handleSignOut = () => {
     clearHoldings()
