@@ -1,5 +1,10 @@
-import { baseAPI } from './base.api';
+import { loginResponseSchema } from '@/src/types/auth'
+import { request } from './base.api'
 
-export const loginApi = (data: { email:string, password: string }) => (
-  baseAPI('/login', 'POST', data)
-)
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
+export const loginApi = (credentials: LoginCredentials) =>
+  request('/user/login', loginResponseSchema, { method: 'POST', body: credentials })

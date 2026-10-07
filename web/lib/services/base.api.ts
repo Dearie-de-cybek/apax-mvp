@@ -1,49 +1,58 @@
-const baseUrl =
-  process.env.NODE_ENV === 'production'
-    ? ''
-    : 'http://localhost:4000';
+import type { ZodType } from 'zod'
 
-export interface ApiResponse {
-  success: boolean;
-  message: string;
-  data?: any;
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+
+export const NETWORK_ERROR = 0
+
+export type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; status: number; message: string }
+
+interface RequestOptions {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  body?: unknown
+  token?: string | null
+  signal?: AbortSignal
 }
 
-export const baseAPI = async (url: string, method: any, body?: unknown) => {
+const readMessage = (payload: unknown, status: number) => {
+  if (payload && typeof payload === 'object' && 'message' in payload && typeof payload.message === 'string') {
+    return payload.message
+  }
+  return `Request failed with status ${status}`
+}
+
+export async function request<T>(
+  path: string,
+  schema: ZodType<T>,
+  { method = 'GET', body, token, signal }: RequestOptions = {},
+): Promise<ApiResult<T>> {
+  let res: Response
   try {
-    const res = await fetch(`${baseUrl}/user${url}`, {
+    res = await fetch(`${API_URL}${path}`, {
       method,
+      signal,
       headers: {
         'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: method !== 'GET' && body ? JSON.stringify(body) : undefined,
-    });
-
-    const text = await res.text();
-    let data: unknown;
-
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      throw new Error('Invalid JSON response from server');
-    }
-
-    const responseData = data as Partial<ApiResponse> | null;
-
-    if (!res.ok) {
-      throw new Error(responseData?.message || `Request failed with status ${res.status}`);
-    }
-    return {
-      success: true,
-      message: responseData?.message ?? 'Request successful',
-      data: responseData?.data ?? responseData,
-    };
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Something went wrong';
-
-    return {
-      success: false,
-      message,
-    };
+    if (error instanceof DOMException && error.name === 'AbortError') throw error
+    return { ok: false, status: NETWORK_ERROR, message: 'Network request failed' }
   }
-};
+
+  const payload: unknown = await res.json().catch(() => null)
+
+  if (!res.ok) {
+    return { ok: false, status: res.status, message: readMessage(payload, res.status) }
+  }
+
+  const parsed = schema.safeParse(payload)
+  if (!parsed.success) {
+    return { ok: false, status: res.status, message: 'Unexpected response from server' }
+  }
+
+  return { ok: true, data: parsed.data }
+}

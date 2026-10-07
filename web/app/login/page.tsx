@@ -36,7 +36,7 @@ export default function LoginPage() {
     // Navigate after animation
     // await new Promise(resolve => setTimeout(resolve, 1000))
     // router.push('/dashboard')
-    if(res.data) {
+    if(res.ok) {
       router.push('/dashbaord')
     } else {
       alert('Something went wrong')
