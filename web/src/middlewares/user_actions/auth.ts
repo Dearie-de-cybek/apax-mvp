@@ -1,25 +1,31 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import User from "../../models/userModel";
+import User, { IUser } from "../../models/userModel";
 import ErrorHandler from "../../utils/errorHandler";
 import asyncErrorHandler from "../helpers/asyncErrorHandler";
 
-/**
- * Extend Express Request to include user
- * (Ideally place this in a global typings file)
- */
 export interface AuthenticatedRequest extends Request {
-  user?: any; // replace `any` with IUser if you have a User interface
+  user?: IUser;
 }
 
 interface DecodedToken extends JwtPayload {
   id: string;
+  email: string;
 }
+
+export const readBearerToken = (header?: string): string | null => {
+  if (!header) return null;
+
+  const [scheme, token] = header.split(" ");
+  if (scheme !== "Bearer" || !token) return null;
+
+  return token;
+};
 
 // Check if user is authenticated
 export const isAuthenticatedUser = asyncErrorHandler(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const { token } = req.cookies;
+    const token = readBearerToken(req.headers.authorization);
 
     if (!token) {
       return next(new ErrorHandler("Please Login to Access", 401));
@@ -33,7 +39,7 @@ export const isAuthenticatedUser = asyncErrorHandler(
     const user = await User.findById(decodedData.id);
 
     if (!user) {
-      return next(new ErrorHandler("User not found", 404));
+      return next(new ErrorHandler("Account no longer exists", 401));
     }
 
     req.user = user;

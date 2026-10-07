@@ -1,27 +1,20 @@
 import { Response } from "express";
 import { IUser } from "../models/userModel";
-
-interface SendTokenOptions {
-  httpOnly?: boolean;
-  expires?: Date;
-}
+import { LoginResponse } from "../types/auth";
 
 const sendToken = (user: IUser, statusCode: number, res: Response) => {
-  const token = user.getJWTToken();
-
-  const options: SendTokenOptions = {
-    expires: new Date(
-      Date.now() +
-        Number(process.env.COOKIE_EXPIRE ?? 7) * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
+  const body: LoginResponse = {
+    success: true,
+    token: user.getJWTToken(),
+    user: {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
   };
 
-  res.status(statusCode).cookie("token", token, options).json({
-    success: true,
-    user,
-    token,
-  });
+  res.status(statusCode).json(body);
 };
 
 export default sendToken;

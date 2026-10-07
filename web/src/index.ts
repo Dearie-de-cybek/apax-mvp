@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import "dotenv/config";
 
 import connectDatabase from "./config/database";
@@ -21,7 +20,6 @@ if (!MONGO_URI || !JWT_SECRET) {
 const app = express();
 
 app.use(cors({ origin: CLIENT_URL }));
-app.use(cookieParser());
 app.use(express.json({ limit: "100kb" }));
 
 app.use("/activity", activityRoutes);

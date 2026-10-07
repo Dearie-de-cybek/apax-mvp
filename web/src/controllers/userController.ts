@@ -64,13 +64,9 @@ export const loginUser = asyncErrorHandler(
 );
 
 // ================= LOGOUT =================
+// Tokens are stateless bearer tokens, the client drops its copy.
 export const logoutUser = asyncErrorHandler(
   async (req: Request, res: Response) => {
-    res.cookie("token", null, {
-      expires: new Date(Date.now()),
-      httpOnly: true,
-    });
-
     res.status(200).json({
       success: true,
       message: "Logged Out",
