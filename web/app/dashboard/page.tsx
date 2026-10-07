@@ -9,12 +9,12 @@ import { ZakatView } from '@/components/views/zakat-view'
 import { RedemptionView } from '@/components/views/redemption-view'
 import { ShariaView } from '@/components/views/sharia-view'
 import { useAPAXStore } from '@/lib/store'
-import { useAuthStore } from '@/lib/auth-store'
+import { useAuthStore, useSessionReady } from '@/lib/auth-store'
 
 export default function DashboardPage() {
   const router = useRouter()
   const { activeView, addAuditLog, fetchHoldings } = useAPAXStore()
-  const hydrated = useAuthStore((s) => s.hydrated)
+  const hydrated = useSessionReady()
   const token = useAuthStore((s) => s.token)
 
   // Send signed-out visitors (or expired sessions) back to login

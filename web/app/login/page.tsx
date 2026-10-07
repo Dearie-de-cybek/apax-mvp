@@ -9,14 +9,14 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { EmailLoginForm } from '@/components/auth/email-login-form'
 import { VaultDoor } from '@/components/auth/vault-door'
-import { useAuthStore } from '@/lib/auth-store'
+import { useAuthStore, useSessionReady } from '@/lib/auth-store'
 
 const VAULT_ANIMATION_MS = 1000
 
 export default function LoginPage() {
   const router = useRouter()
   const [vaultOpening, setVaultOpening] = useState(false)
-  const hydrated = useAuthStore((s) => s.hydrated)
+  const hydrated = useSessionReady()
   const token = useAuthStore((s) => s.token)
 
   useEffect(() => {
