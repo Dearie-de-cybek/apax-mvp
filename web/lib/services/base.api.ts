@@ -3,6 +3,7 @@ import type { ZodType } from 'zod'
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
 
 export const NETWORK_ERROR = 0
+const TIMEOUT_MS = 15_000
 
 export type ApiResult<T> =
   | { ok: true; data: T }
@@ -31,7 +32,7 @@ export async function request<T>(
   try {
     res = await fetch(`${API_URL}${path}`, {
       method,
-      signal,
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(TIMEOUT_MS)]) : AbortSignal.timeout(TIMEOUT_MS),
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -39,7 +40,7 @@ export async function request<T>(
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') throw error
+    if (signal?.aborted) throw error
     return { ok: false, status: NETWORK_ERROR, message: 'Network request failed' }
   }
 
